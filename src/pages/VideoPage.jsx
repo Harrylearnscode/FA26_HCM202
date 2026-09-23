@@ -3,7 +3,7 @@ import ReactPlayer from 'react-player'
 const videoData = {
   title: 'Video thuyết trình',
   subtitle: 'Phân tích ai hưởng lợi trong nền kinh tế số.',
-  src: 'https://pub-660b2c1a53304862ad9c7aa7740e6a44.r2.dev/Cơ_chế_tạo_tài_sản.mp4',
+  src: 'https://pub-5fffdec11f644b0fa58f1720464a2ae8.r2.dev/T%E1%BA%A7m_nh%C3%ACn_chi%E1%BA%BFn_l%C6%B0%E1%BB%A3c_HCM.mp4',
 }
 
 function VideoPage() {

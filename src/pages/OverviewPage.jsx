@@ -1,31 +1,32 @@
-import { SiDeepmind, SiNotebooklm, SiOpenai } from 'react-icons/si'
+import { Bot, Sparkles } from "lucide-react";
 
 const overviewData = {
-  title: 'Phân chia giá trị thặng dư và câu chuyện "tiền đẻ ra tiền"',
-  lecturer: 'Giảng viên hướng dẫn: Nguyễn Văn Bình',
+  title: 'Tư tưởng Hồ Chí Minh về đại đoàn kết toàn dân tộc',
   members: [
     'Phạm Xuân Hoàng - SE190821',
-    'Phan Phước Long Trì - SE184536',
+    'Nguyễn Đức Anh Tài - SE192068',
     'Nguyễn Việt Hoàng - SE182984',
     'Hoàng Huy Hoàng - SE193680',
-    'Nguyễn Hồ Nhật Minh SE190651',
+    'Nguyễn Hồ Nhật Minh - SE190651',
   ],
   presentation: [
-    'Số liệu thực tế của một số công ty.',
-    'Các hình thức biểu hiện của giá trị thặng dư trong nền kinh tế thị trường.',
-    'Trả lời câu hỏi tiền có đẻ ra tiền.',
+    'Vai trò của đại đoàn kết toàn dân tộc',
+    'Lực lượng của khối đại đoàn kết toàn dân tộc',
+    'Điều kiện để xây dựng khối đại đoàn kết toàn dân tộc',
+    'Hình thức và nguyên tắc tổ chức: Mặt trận dân tộc thống nhất',
+    'Phương thức xây dựng khối đại đoàn kết dân tộc'
   ],
   tools: [
     {
       name: 'ChatGPT',
-      subtitle: 'D\u00f9ng \u0111\u1ec3 vibe coding v\u00e0 t\u00ecm hi\u1ec3u n\u1ed9i dung.',
-      icon: SiOpenai,
+      subtitle: 'Dùng để vibe coding và tìm hiểu nội dung.',
+      icon: Bot, // Sử dụng icon Bot của Lucide
       iconClass: 'from-emerald-500 to-green-500',
     },
     {
       name: 'NotebookLM',
-      subtitle: 'D\u00f9ng \u0111\u1ec3 t\u1ea1o video.',
-      icon: SiNotebooklm,
+      subtitle: 'Dùng để tạo video.',
+      icon: Sparkles, // Sử dụng icon Sparkles của Lucide
       iconClass: 'from-sky-500 to-cyan-500',
     },
   ],
@@ -42,9 +43,6 @@ function OverviewPage() {
         </h1>
         <p className="mx-auto max-w-4xl text-lg leading-relaxed text-slate-600 sm:text-2xl">
           {overviewData.subtitle}
-        </p>
-        <p className="mt-4 inline-flex rounded-full border border-cyan-700/20 bg-white/70 px-4 py-2 text-base font-semibold text-cyan-800 backdrop-blur-sm sm:text-xl">
-          {overviewData.lecturer}
         </p>
       </header>
 

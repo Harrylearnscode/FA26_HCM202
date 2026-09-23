@@ -1,298 +1,247 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  CircleCheckBig,
-  CircleX,
-  Play,
-  RotateCcw,
-} from "lucide-react";
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Eye, Trophy, Sparkles, Keyboard as KeyboardIcon } from 'lucide-react';
 
-const QUESTION_POOL = [
+const QUESTIONS = [
   {
-    id: "q01",
-    prompt: "Theo lý luận của C. Mác, chi phí sản xuất tư bản chủ nghĩa (k) bao gồm những bộ phận nào?",
-    options: ["k = c + v", "k = v + m", "k = c + m", "k = c + v + m"],
-    correctIndex: 0,
-    explanation: "Chi phí sản xuất (k = c + v) làm xóa nhòa ranh giới giữa tư bản bất biến (c) và tư bản khả biến (v), che giấu nguồn gốc thực sự tạo ra giá trị thặng dư là sức lao động.",
+    answer: "CẦU ĐỒNG TỒN DỊ",
+    hint: "Phương châm đoàn kết lâu dài, chặt chẽ, chân thành, mang ý nghĩa lấy cái chung để hạn chế cái khác biệt."
   },
   {
-    id: "q02",
-    prompt: "Bản chất của lợi nhuận (p) trong nền kinh tế thị trường là gì?",
-    options: ["Là phần dôi ra ngoài chi phí sản xuất, hình thái biến tướng của giá trị thặng dư", "Là kết quả của việc mua rẻ bán đắt trên thị trường", "Là phần giá trị do máy móc và công nghệ hiện đại tạo ra", "Là do năng lực quản lý của nhà tư bản"],
-    correctIndex: 0,
-    explanation: "Khi giá trị thặng dư (m) được quan niệm là con đẻ của toàn bộ tư bản ứng trước (k), nó mang hình thái biến tướng là lợi nhuận (p).",
+    answer: "HIỆP THƯƠNG DÂN CHỦ",
+    hint: "Nguyên tắc hoạt động cốt lõi của Mặt trận dân tộc thống nhất, nơi mọi vấn đề được bàn bạc công khai để đi đến nhất trí."
   },
   {
-    id: "q03",
-    prompt: "Tỷ suất lợi nhuận (p') phản ánh điều gì trong hoạt động của nhà tư bản?",
-    options: ["Quy mô sản xuất của doanh nghiệp", "Trình độ bóc lột sức lao động của nhà tư bản", "Mức doanh lợi đầu tư, hiệu quả sử dụng vốn", "Số lượng hàng hóa tiêu thụ được trên thị trường"],
-    correctIndex: 2,
-    explanation: "Nếu m' phản ánh trình độ bóc lột sức lao động, thì p' phản ánh mức doanh lợi đầu tư, tức là một đồng vốn bỏ ra thu được bao nhiêu đồng lợi nhuận.",
+    answer: "KHOAN DUNG",
+    hint: "Thái độ cần có để xây dựng khối đại đoàn kết, thể hiện qua việc trân trọng phần thiện dù nhỏ nhất ở mỗi người."
   },
   {
-    id: "q04",
-    prompt: "Sự tự do cạnh tranh và di chuyển vốn giữa các ngành sản xuất khác nhau sẽ dẫn đến sự hình thành của đại lượng nào?",
-    options: ["Giá trị thặng dư siêu ngạch", "Lợi nhuận bình quân", "Lợi nhuận thương nghiệp", "Lợi tức cho vay"],
-    correctIndex: 1,
-    explanation: "Tư bản di chuyển từ ngành có tỷ suất lợi nhuận thấp sang ngành có tỷ suất cao, làm san bằng các tỷ suất lợi nhuận cá biệt thành tỷ suất lợi nhuận bình quân.",
+    answer: "DÂN VẬN",
+    hint: "Công tác giáo dục, tuyên truyền, giải thích và hướng dẫn để quần chúng hiểu rõ quyền lợi và trách nhiệm của mình."
   },
   {
-    id: "q05",
-    prompt: "Khi hình thành tỷ suất lợi nhuận bình quân, giá trị hàng hóa (W) sẽ chuyển hóa thành hình thái nào?",
-    options: ["Giá cả thị trường", "Giá cả độc quyền", "Giá cả sản xuất", "Giá trị sử dụng"],
-    correctIndex: 2,
-    explanation: "Giá cả sản xuất = Chi phí sản xuất (k) + Lợi nhuận bình quân. Đây là cơ sở hình thành giá cả thị trường.",
-  },
-  {
-    id: "q06",
-    prompt: "Lợi nhuận thương nghiệp mà nhà tư bản thương nghiệp thu được có nguồn gốc thực sự từ đâu?",
-    options: ["Từ tài năng mua bán trên thị trường", "Từ sức lao động của nhân viên bán hàng", "Một phần giá trị thặng dư do công nhân sản xuất tạo ra", "Từ sự khan hiếm của hàng hóa tiêu dùng"],
-    correctIndex: 2,
-    explanation: "Nhà tư bản công nghiệp phải nhường một phần giá trị thặng dư (chênh lệch giữa giá bán buôn và giá bán lẻ) cho nhà tư bản thương nghiệp để họ đảm nhận khâu lưu thông.",
-  },
-  {
-    id: "q07",
-    prompt: "Lợi tức (z) mà nhà tư bản đi vay phải trả cho nhà tư bản cho vay bản chất là gì?",
-    options: ["Tiền công quản lý quỹ tài chính", "Một phần lợi nhuận bình quân sinh ra từ tư bản đi vay", "Phần thưởng cho sự tiết kiệm của người cho vay", "Giá cả của đồng tiền"],
-    correctIndex: 1,
-    explanation: "Lợi tức là sự phân chia lợi nhuận bình quân giữa tư bản cho vay (người sở hữu vốn) và tư bản đi vay (người sử dụng vốn kinh doanh).",
-  },
-  {
-    id: "q08",
-    prompt: "Địa tô tư bản chủ nghĩa (R) là phần giá trị nào mà nhà tư bản kinh doanh nông nghiệp phải nộp cho địa chủ?",
-    options: ["Lợi nhuận bình quân của ngành nông nghiệp", "Phần giá trị thặng dư siêu ngạch ngoài lợi nhuận bình quân", "Tiền khấu hao do làm suy kiệt đất đai", "Chi phí mua phân bón và cải tạo đất"],
-    correctIndex: 1,
-    explanation: "Nhà tư bản nông nghiệp thu được lợi nhuận bình quân, còn phần giá trị thặng dư siêu ngạch tạo ra nhờ ruộng đất (tốt, vị trí thuận lợi) phải nộp cho địa chủ dưới dạng địa tô.",
-  },
-  {
-    id: "q09",
-    prompt: "Loại địa tô mà mọi mảnh đất cho thuê, dù là mảnh đất xấu nhất, cũng phải nộp do sự độc quyền sở hữu ruộng đất gây ra gọi là gì?",
-    options: ["Địa tô chênh lệch I", "Địa tô chênh lệch II", "Địa tô tuyệt đối", "Địa tô độc quyền"],
-    correctIndex: 2,
-    explanation: "Địa tô tuyệt đối là khoản thu nhập mà địa chủ nhận được hoàn toàn nhờ vào sự độc quyền sở hữu ruộng đất, bất kể độ màu mỡ của đất.",
-  },
-  {
-    id: "q10",
-    prompt: "Điểm chung nhất của lợi nhuận công nghiệp, lợi nhuận thương nghiệp, lợi tức và địa tô là gì?",
-    options: ["Đều sinh ra từ quá trình lưu thông", "Đều là các hình thái biến tướng của giá trị thặng dư", "Đều được chia đều cho các giai cấp trong xã hội", "Đều do sự tiến bộ của khoa học công nghệ"],
-    correctIndex: 1,
-    explanation: "Dù biểu hiện dưới hình thức nào và được phân chia cho ai, nguồn gốc duy nhất của chúng vẫn là lao động không công của công nhân (giá trị thặng dư).",
+    answer: "NHÂN DÂN",
+    hint: "Quán triệt nguyên tắc 'Nước lấy (...) làm gốc', Hồ Chí Minh nhấn mạnh phải có niềm tin vào sức mạnh vô địch của lực lượng này."
   }
 ];
 
-const diversifyQuestionPool = (pool) =>
-  pool.map((question, questionIndex) => {
-    const optionCount = question.options.length;
-    if (optionCount === 0) return question;
+const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-    const safeCorrectIndex = Math.min(Math.max(question.correctIndex, 0), optionCount - 1);
-    const targetIndex = questionIndex % optionCount;
-
-    if (safeCorrectIndex === targetIndex) return question;
-
-    const diversifiedOptions = [...question.options];
-    const [correctOption] = diversifiedOptions.splice(safeCorrectIndex, 1);
-    diversifiedOptions.splice(targetIndex, 0, correctOption);
-
-    return { ...question, options: diversifiedOptions, correctIndex: targetIndex };
-  });
-
-const DIVERSIFIED_QUESTION_POOL = diversifyQuestionPool(QUESTION_POOL);
-const SHIFT_QUESTION_LIMIT = 8;
-
-const shuffleQuestions = (pool) => {
-  const shuffled = [...pool];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
-  }
-  return shuffled;
+// Hàm chuẩn hóa tiếng Việt thành không dấu
+const removeDiacritics = (str) => {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/Đ/g, "D")
+    .replace(/đ/g, "d")
+    .toUpperCase();
 };
 
-function GamePage() {
-  const MotionSection = motion.section;
-
-  const [gameStarted, setGameStarted] = useState(false);
-  const [shiftEnded, setShiftEnded] = useState(false);
-  const [questionSet, setQuestionSet] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [totalAnswered, setTotalAnswered] = useState(0);
-  const [score, setScore] = useState(0);
-  const [feedback, setFeedback] = useState(null);
-  const [locked, setLocked] = useState(false);
-  const [selectedOptionIndex, setSelectedOptionIndex] = useState(null);
-
-  const currentQuestion = gameStarted && !shiftEnded && questionSet.length > 0 ? (questionSet[currentIndex] ?? null) : null;
-  const isFinished = gameStarted && shiftEnded;
-  const isShiftRunning = gameStarted && !shiftEnded;
-  const answeredInCurrentShift = Math.min(totalAnswered + (locked ? 1 : 0), SHIFT_QUESTION_LIMIT);
-  const progressValue = Math.round((answeredInCurrentShift / SHIFT_QUESTION_LIMIT) * 100);
-
-  const startGame = () => {
-    setGameStarted(true);
-    setShiftEnded(false);
-    setQuestionSet(shuffleQuestions(DIVERSIFIED_QUESTION_POOL));
-    setCurrentIndex(0);
-    setTotalAnswered(0);
-    setScore(0);
-    setFeedback(null);
-    setLocked(false);
-    setSelectedOptionIndex(null);
-  };
-
-  const endShift = () => {
-    if (!gameStarted || shiftEnded) return;
-    setShiftEnded(true);
-    setLocked(false);
-    setSelectedOptionIndex(null);
-    setFeedback(null);
-  };
-
-  const handleAnswer = (selectedIndex) => {
-    if (locked || !currentQuestion) return;
-
-    setSelectedOptionIndex(selectedIndex);
-    const isCorrect = selectedIndex === currentQuestion.correctIndex;
-
-    if (isCorrect) {
-      setScore(prev => prev + 1);
-    }
-
-    setFeedback({
-      type: isCorrect ? "success" : "error",
-      text: isCorrect ? "Chính xác!" : "Chưa chính xác!",
-      explanation: currentQuestion.explanation,
-    });
-
-    setLocked(true);
-  };
-
-  const handleNext = () => {
-    if (!locked) return;
-    const answeredAfterNext = totalAnswered + 1;
-    setFeedback(null);
-    setLocked(false);
-    setSelectedOptionIndex(null);
-    setTotalAnswered(answeredAfterNext);
-
-    if (answeredAfterNext >= SHIFT_QUESTION_LIMIT) {
-      endShift();
-      return;
-    }
-
-    setCurrentIndex(prev => (prev + 1) >= questionSet.length ? 0 : prev + 1);
-  };
+const Tile = ({ char, isRevealed }) => {
+  // Khoảng trắng không render ô
+  if (char === " ") {
+    return <div className="w-4 sm:w-8 h-16 sm:h-20 shrink-0" />;
+  }
 
   return (
-    <section className="animate-fade-up animate-fade-up-delay-1 w-full px-1 sm:px-2 pb-20">
-      <header className={isShiftRunning ? "mb-3 text-center" : "mb-8 text-center"}>
-        <p className="mb-2 text-xs font-semibold tracking-[0.2em] text-indigo-700 uppercase">
-          Thử thách Ôn tập Lý thuyết
+    <div className="relative w-12 h-16 sm:w-16 sm:h-20 shrink-0 select-none perspective-[1000px]">
+      <motion.div
+        className="w-full h-full relative"
+        style={{ transformStyle: "preserve-3d" }}
+        animate={{ rotateY: isRevealed ? 180 : 0 }}
+        transition={{ type: "spring", stiffness: 60, damping: 14 }}
+      >
+        {/* Mặt trước (Khi bị che - Nền xanh) */}
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-blue-500 to-indigo-700 rounded-lg shadow-[0_6px_0_#312e81,0_10px_15px_rgba(0,0,0,0.5)] border border-blue-400 flex items-center justify-center cursor-default"
+          style={{ backfaceVisibility: "hidden" }}
+        >
+          <div className="w-1/2 h-1/2 rounded-sm bg-blue-300/20 shadow-inner" />
+        </div>
+
+        {/* Mặt sau (Khi lật ra - Hiển thị chữ) */}
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-yellow-50 to-amber-100 rounded-lg shadow-[0_6px_0_#b45309,0_10px_15px_rgba(0,0,0,0.5)] flex items-center justify-center border-2 border-yellow-200"
+          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+        >
+          <span className="text-3xl sm:text-4xl font-extrabold text-slate-800 tracking-tighter">
+            {char}
+          </span>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+const Keyboard = ({ guessedLetters, onGuess, isWon }) => {
+  return (
+    <div className="w-full max-w-4xl mx-auto mt-12 bg-slate-900/60 p-4 sm:p-6 rounded-3xl backdrop-blur-md border border-white/10 shadow-2xl">
+      <div className="flex items-center gap-2 text-slate-400 mb-4 justify-center text-sm font-medium uppercase tracking-widest">
+        <KeyboardIcon size={16} />
+        Nhập phím hoặc click
+      </div>
+      <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+        {ALPHABET.map((letter) => {
+          const isGuessed = guessedLetters.includes(letter);
+          return (
+            <button
+              key={letter}
+              disabled={isGuessed || isWon}
+              onClick={() => onGuess(letter)}
+              className={`
+                w-10 h-12 sm:w-12 sm:h-14 rounded-lg font-bold text-lg sm:text-xl transition-all
+                flex items-center justify-center shadow-md border-b-4 active:border-b-0 active:translate-y-1
+                ${isGuessed 
+                  ? "bg-slate-800 text-slate-600 border-slate-900 cursor-not-allowed opacity-50" 
+                  : "bg-gradient-to-b from-slate-200 to-slate-400 text-slate-900 border-slate-500 hover:brightness-110 hover:shadow-lg"}
+              `}
+            >
+              {letter}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export default function GamePage() {
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [guessedLetters, setGuessedLetters] = useState([]);
+  const [forceReveal, setForceReveal] = useState(false);
+
+  const currentQ = QUESTIONS[currentQIndex];
+  const normalizedAnswer = useMemo(() => removeDiacritics(currentQ.answer), [currentQ.answer]);
+
+  // Kiểm tra điều kiện thắng
+  const isWon = useMemo(() => {
+    return [...normalizedAnswer].every(char => 
+      char === ' ' || guessedLetters.includes(char)
+    ) || forceReveal;
+  }, [normalizedAnswer, guessedLetters, forceReveal]);
+
+  const handleGuess = useCallback((letter) => {
+    const upperLetter = letter.toUpperCase();
+    if (!ALPHABET.includes(upperLetter)) return;
+    if (guessedLetters.includes(upperLetter) || isWon) return;
+
+    setGuessedLetters(prev => [...prev, upperLetter]);
+  }, [guessedLetters, isWon]);
+
+  // Lắng nghe bàn phím vật lý
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Chỉ nhận ký tự A-Z khi không focus vào input nào khác (mặc dù ở đây không có input)
+      if (/^[a-zA-Z]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        handleGuess(e.key);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleGuess]);
+
+  const resetBoard = () => {
+    setGuessedLetters([]);
+    setForceReveal(false);
+  };
+
+  const goToNext = () => {
+    if (currentQIndex < QUESTIONS.length - 1) {
+      setCurrentQIndex(prev => prev + 1);
+      resetBoard();
+    }
+  };
+
+  const goToPrev = () => {
+    if (currentQIndex > 0) {
+      setCurrentQIndex(prev => prev - 1);
+      resetBoard();
+    }
+  };
+
+  const revealAll = () => {
+    setForceReveal(true);
+  };
+
+  // Tách từ để có thể xuống dòng (wrap) theo từng từ chứ không đứt ngang từ
+  const words = currentQ.answer.split(' ');
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-rose-950 flex flex-col items-center justify-center p-4 sm:p-8 font-sans overflow-hidden relative">
+      
+      {/* Background Decor */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-rose-600/20 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* Header & Controls */}
+      <div className="w-full max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 relative z-10">
+        <div className="flex gap-2">
+          <button onClick={goToPrev} disabled={currentQIndex === 0} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1 font-medium">
+            <ChevronLeft size={18} /> Trước
+          </button>
+          <button onClick={goToNext} disabled={currentQIndex === QUESTIONS.length - 1} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1 font-medium">
+            Tiếp <ChevronRight size={18} />
+          </button>
+        </div>
+
+        <div className="text-rose-200/80 font-semibold tracking-widest text-sm bg-rose-950/50 px-4 py-1.5 rounded-full border border-rose-800/50">
+          CÂU HỎI {currentQIndex + 1} / {QUESTIONS.length}
+        </div>
+
+        <button onClick={revealAll} disabled={isWon} className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-amber-950 rounded-lg transition shadow-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+          <Eye size={18} /> Mở toàn bộ
+        </button>
+      </div>
+
+      {/* Hint Box */}
+      <motion.div 
+        key={`hint-${currentQIndex}`}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-4xl bg-slate-800/80 backdrop-blur-xl border border-indigo-400/30 p-6 sm:p-8 rounded-3xl shadow-[0_0_40px_rgba(79,70,229,0.15)] relative z-10 mb-12 text-center min-h-[140px] flex items-center justify-center"
+      >
+        <p className="text-xl sm:text-2xl text-indigo-100 leading-relaxed font-medium">
+          {currentQ.hint}
         </p>
-        <h1 className={isShiftRunning ? "text-2xl font-semibold text-slate-800 sm:text-3xl" : "text-4xl font-semibold text-slate-800 sm:text-5xl"}>
-          Hình thái Giá trị Thặng dư
-        </h1>
-        {!isShiftRunning && (
-          <p className="mx-auto mt-2 max-w-3xl text-lg text-slate-600 sm:text-xl">
-            Củng cố kiến thức kinh tế chính trị về cách giá trị thặng dư được phân chia thành lợi nhuận, lợi tức và địa tô.
-          </p>
-        )}
-      </header>
+      </motion.div>
 
-      <article className={`rounded-[30px] border border-white/70 bg-slate-100/70 shadow-[0_18px_40px_rgba(13,55,89,0.12)] backdrop-blur-md ${isShiftRunning ? "p-3 sm:p-4" : "p-5 sm:p-7"}`}>
-        
-        {isShiftRunning && (
-          <div className="mb-5 h-2 w-full overflow-hidden rounded-full bg-slate-200">
-            <div className="h-full bg-indigo-500 transition-all duration-300" style={{ width: `${progressValue}%` }} />
-          </div>
-        )}
-
-        <main className={`rounded-2xl bg-white ${isShiftRunning ? "p-4" : "p-6"}`}>
-          {!gameStarted && (
-            <section className="text-center">
-              <h2 className="text-2xl font-semibold text-slate-800">Sẵn sàng ôn tập?</h2>
-              <button onClick={startGame} className="mt-6 inline-flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700">
-                <Play className="h-4 w-4" /> Bắt đầu bài trắc nghiệm
-              </button>
-            </section>
+      {/* Board */}
+      <div className="w-full max-w-5xl flex flex-col items-center justify-center relative z-10 min-h-[250px]">
+        <AnimatePresence>
+          {isWon && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.5, y: -50 }}
+              animate={{ opacity: 1, scale: 1, y: -90 }}
+              className="absolute top-0 flex items-center gap-3 bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-950 px-8 py-3 rounded-full font-bold text-2xl shadow-xl shadow-amber-500/20 z-20 border-2 border-yellow-200"
+            >
+              <Sparkles size={28} className="animate-pulse" />
+              CHÍNH XÁC!
+              <Trophy size={28} />
+            </motion.div>
           )}
+        </AnimatePresence>
 
-          {gameStarted && !isFinished && currentQuestion && (
-            <section>
-              <h2 className="text-xl font-bold text-indigo-900">Câu hỏi {totalAnswered + 1}/{SHIFT_QUESTION_LIMIT}</h2>
-              <p className="mt-2 text-lg font-medium text-slate-700">{currentQuestion.prompt}</p>
+        <div className="flex flex-wrap justify-center gap-y-4 gap-x-3 sm:gap-x-4 max-w-[90%]">
+          {words.map((word, wordIdx) => (
+            // Flex row cho mỗi từ để các ký tự trong một từ không bị rớt dòng ngẫu nhiên
+            <div key={wordIdx} className="flex gap-1 sm:gap-2">
+              {[...word].map((char, charIdx) => {
+                const normChar = removeDiacritics(char);
+                const isRevealed = guessedLetters.includes(normChar) || forceReveal;
+                return (
+                  <Tile key={`${wordIdx}-${charIdx}`} char={char} isRevealed={isRevealed} />
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
 
-              <div className="mt-4 grid gap-3">
-                {currentQuestion.options.map((option, optionIndex) => {
-                  const isCorrectOption = optionIndex === currentQuestion.correctIndex;
-                  const isSelectedOption = optionIndex === selectedOptionIndex;
-                  const shouldHighlightSelectedCorrect = locked && feedback?.type === "success" && isSelectedOption && isCorrectOption;
-                  const shouldHighlightCorrect = locked && feedback?.type === "error" && isCorrectOption;
-                  const shouldHighlightWrongSelection = locked && feedback?.type === "error" && isSelectedOption && !isCorrectOption;
+      {/* Keyboard */}
+      <div className="relative z-10 w-full mt-auto">
+        <Keyboard guessedLetters={guessedLetters} onGuess={handleGuess} isWon={isWon} />
+      </div>
 
-                  return (
-                    <button
-                      key={optionIndex}
-                      onClick={() => handleAnswer(optionIndex)}
-                      disabled={locked}
-                      className={`rounded-xl border p-4 text-left font-medium transition ${
-                        shouldHighlightSelectedCorrect ? "border-emerald-500 bg-emerald-50 text-emerald-800"
-                        : shouldHighlightCorrect ? "border-emerald-500 bg-emerald-50 text-emerald-800"
-                        : shouldHighlightWrongSelection ? "border-rose-400 bg-rose-50 text-rose-800"
-                        : "border-slate-200 text-slate-700 hover:border-indigo-300 hover:bg-indigo-50"
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <AnimatePresence>
-                {feedback && (
-                  <MotionSection initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0}} className={`mt-5 rounded-xl p-4 ${feedback.type === "success" ? "bg-emerald-100/70" : "bg-rose-100/70"}`}>
-                    <p className="flex items-center gap-2 font-bold text-slate-800">
-                      {feedback.type === "success" ? <CircleCheckBig className="h-5 w-5 text-emerald-600"/> : <CircleX className="h-5 w-5 text-rose-600"/>}
-                      {feedback.text}
-                    </p>
-                    <p className="mt-2 text-sm text-slate-700"><strong>Giải thích:</strong> {feedback.explanation}</p>
-                  </MotionSection>
-                )}
-              </AnimatePresence>
-
-              {locked && (
-                <button onClick={handleNext} className="mt-5 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700">
-                  {totalAnswered + 1 >= SHIFT_QUESTION_LIMIT ? "Xem Kết quả" : "Câu tiếp theo"}
-                </button>
-              )}
-            </section>
-          )}
-
-          {isFinished && (
-            <section className="text-center">
-              <h2 className="text-3xl font-bold text-indigo-900">Kết quả Ôn tập</h2>
-              
-              <div className="mx-auto mt-6 max-w-sm rounded-2xl bg-indigo-50 p-6 border border-indigo-100">
-                <p className="text-sm font-bold text-indigo-800 uppercase tracking-wider">Điểm của bạn</p>
-                <p className="text-5xl font-black text-indigo-600 mt-2">{score} / {SHIFT_QUESTION_LIMIT}</p>
-              </div>
-
-              <p className="mt-6 text-lg font-bold text-slate-800">
-                Nắm vững Lý thuyết:
-                <span className="block text-slate-600 font-medium text-base mt-1">
-                  Mọi hình thức phân phối như lợi nhuận, lợi tức hay địa tô đều che giấu bản chất thực sự của nền kinh tế tư bản chủ nghĩa: sự bóc lột giá trị thặng dư.
-                </span>
-              </p>
-
-              <button onClick={startGame} className="mt-8 inline-flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700">
-                <RotateCcw className="h-4 w-4" /> Làm lại bài trắc nghiệm
-              </button>
-            </section>
-          )}
-        </main>
-      </article>
-    </section>
+    </div>
   );
 }
-
-export default GamePage;

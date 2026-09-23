@@ -12,7 +12,7 @@ function Header() {
     <header className="fixed top-0 right-0 left-0 z-40 border-b border-white/70 bg-white/40 backdrop-blur-xl">
       <div className="animate-fade-up flex items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-12">
         <div>
-          <p className="m-0 text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-700">MLN122</p>
+          <p className="m-0 text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-700">HCM202</p>
           <p className="m-0 hidden text-base font-semibold text-slate-700 sm:block sm:text-lg">
             {'Gi\u00e1 tr\u1ecb th\u1eb7ng d\u01b0 trong kinh t\u1ebf s\u1ed1'}
           </p>
